@@ -314,7 +314,10 @@ class ProjectController extends PHPCI\Controller
         $form->setMethod('POST');
         $form->setAction(PHPCI_URL.'project/' . $type);
         $form->addField(new Form\Element\Csrf('csrf'));
-        $form->addField(new Form\Element\Hidden('pubkey'));
+
+        $field = new Form\Element\Hidden('pubkey');
+        $field->setId('pubkey-hidden');
+        $form->addField($field);
 
         $options = array(
             'choose' => Lang::get('select_repository_type'),
