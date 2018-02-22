@@ -86,3 +86,7 @@
 .ml20px {
     margin-left: 20px
 }
+
+.phpci label.checkbox {
+    margin-left: 20px;
+}
