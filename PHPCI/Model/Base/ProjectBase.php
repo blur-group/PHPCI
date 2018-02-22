@@ -37,6 +37,7 @@ class ProjectBase extends Model
         'title' => null,
         'reference' => null,
         'branch' => null,
+        'only_build_default_branch' => false,
         'ssh_private_key' => null,
         'type' => null,
         'access_information' => null,
@@ -57,6 +58,7 @@ class ProjectBase extends Model
         'title' => 'getTitle',
         'reference' => 'getReference',
         'branch' => 'getBranch',
+        'only_build_default_branch' => 'getOnlyBuildDefaultBranch',
         'ssh_private_key' => 'getSshPrivateKey',
         'type' => 'getType',
         'access_information' => 'getAccessInformation',
@@ -80,6 +82,7 @@ class ProjectBase extends Model
         'title' => 'setTitle',
         'reference' => 'setReference',
         'branch' => 'setBranch',
+        'only_build_default_branch' => 'setOnlyBuildDefaultBranch',
         'ssh_private_key' => 'setSshPrivateKey',
         'type' => 'setType',
         'access_information' => 'setAccessInformation',
@@ -119,6 +122,11 @@ class ProjectBase extends Model
             'type' => 'varchar',
             'length' => 250,
             'default' => 'master',
+        ),
+        'only_build_default_branch' => array(
+            'type' => 'tinyint',
+            'length' => 1,
+            'default' => false,
         ),
         'ssh_private_key' => array(
             'type' => 'text',
@@ -234,6 +242,18 @@ class ProjectBase extends Model
     public function getBranch()
     {
         $rtn    = $this->data['branch'];
+
+        return $rtn;
+    }
+
+    /**
+     * Get the value of Only Build Default Branch/ only_build_default_branch
+     *
+     * @return string
+     */
+    public function getOnlyBuildDefaultBranch()
+    {
+        $rtn    = $this->data['only_build_default_branch'];
 
         return $rtn;
     }
@@ -424,6 +444,25 @@ class ProjectBase extends Model
         $this->data['branch'] = $value;
 
         $this->_setModified('branch');
+    }
+
+    /**
+     * Set the value of Only Build Default Branch / only_build_default_branch.
+     *
+     * Must not be null.
+     * @param $value boolean
+     */
+    public function setOnlyBuildDefaultBranch($value)
+    {
+        $this->_validateInt('OnlyBuildDefaultBranch', $value);
+
+        if ($this->data['only_build_default_branch'] === $value) {
+            return;
+        }
+
+        $this->data['only_build_default_branch'] = $value;
+
+        $this->_setModified('only_build_default_branch');
     }
 
     /**

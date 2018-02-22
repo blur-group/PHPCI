@@ -108,12 +108,19 @@ class WebhookController extends \b8\Controller
 
     /**
      * Bitbucket webhooks.
+     *
+     * @param $payload
+     * @param Project $project
+     * @return array
      */
     protected function bitbucketWebhook($payload, $project)
     {
         $results = array();
         $status = 'failed';
         foreach ($payload['push']['changes'] as $commit) {
+            if ( $project->getOnlyBuildDefaultBranch() && $commit['new']['name'] != $project->getBranch() ) {
+                continue;
+            }
             try {
                 $email = $commit['new']['target']['author']['raw'];
                 $email = substr($email, 0, strpos($email, '>'));
@@ -132,6 +139,10 @@ class WebhookController extends \b8\Controller
             }
         }
 
+        if (empty($results)) {
+            return array('status' => 'ignored', 'message' => 'No commits to default branch');
+        }
+
         return array('status' => $status, 'commits' => $results);
     }
 
@@ -145,6 +156,9 @@ class WebhookController extends \b8\Controller
         $results = array();
         $status = 'failed';
         foreach ($payload['commits'] as $commit) {
+            if ( $project->getOnlyBuildDefaultBranch() && $commit['branch'] != $project->getBranch() ) {
+                continue;
+            }
             try {
                 $email = $commit['raw_author'];
                 $email = substr($email, 0, strpos($email, '>'));
@@ -163,6 +177,10 @@ class WebhookController extends \b8\Controller
             }
         }
 
+        if (empty($results)) {
+            return array('status' => 'ignored', 'message' => 'No commits to default branch');
+        }
+
         return array('status' => $status, 'commits' => $results);
     }
 
@@ -175,6 +193,9 @@ class WebhookController extends \b8\Controller
     {
         $project = $this->fetchProject($projectId, array('local', 'remote'));
         $branch = $this->getParam('branch', $project->getBranch());
+        if ($project->getOnlyBuildDefaultBranch() && $branch != $project->getBranch()) {
+            return array('status' => 'ignored', 'message' => 'Not default branch');
+        }
         $commit = $this->getParam('commit');
         $commitMessage = $this->getParam('message');
         $committer = $this->getParam('committer');
@@ -243,6 +264,9 @@ class WebhookController extends \b8\Controller
 
                 try {
                     $branch = str_replace('refs/heads/', '', $payload['ref']);
+                    if ($project->getOnlyBuildDefaultBranch() && $branch != $project->getBranch()) {
+                        continue;
+                    }
                     $committer = $commit['committer']['email'];
                     $results[$commit['id']] = $this->createBuild(
                         $project,
@@ -257,6 +281,10 @@ class WebhookController extends \b8\Controller
                 }
             }
             return array('status' => $status, 'commits' => $results);
+        }
+
+        if (empty($results)) {
+            return array('status' => 'ignored', 'message' => 'Not default branch');
         }
 
         if (substr($payload['ref'], 0, 10) == 'refs/tags/') {
@@ -312,6 +340,9 @@ class WebhookController extends \b8\Controller
 
             try {
                 $branch = str_replace('refs/heads/', '', $payload['pull_request']['base']['ref']);
+                if ($project->getOnlyBuildDefaultBranch() && $branch != $project->getBranch()) {
+                    continue;
+                }
                 $committer = $commit['commit']['author']['email'];
                 $message = $commit['commit']['message'];
 
@@ -332,6 +363,10 @@ class WebhookController extends \b8\Controller
             }
         }
 
+        if (empty($results)) {
+            return array('status' => 'ignored', 'message' => 'Not default branch');
+        }
+
         return array('status' => $status, 'commits' => $results);
     }
 
@@ -349,6 +384,10 @@ class WebhookController extends \b8\Controller
         if (isset($payload['object_kind']) && $payload['object_kind'] == 'merge_request') {
             $attributes = $payload['object_attributes'];
             if ($attributes['state'] == 'opened' || $attributes['state'] == 'reopened') {
+                if ($project->getOnlyBuildDefaultBranch() && $attributes['target_branch'] != $project->getBranch()) {
+                    return array('status' => 'ignored', 'message' => 'Not default branch');
+                }
+
                 $branch = $attributes['source_branch'];
                 $commit = $attributes['last_commit'];
                 $committer = $commit['author']['email'];
@@ -366,6 +405,9 @@ class WebhookController extends \b8\Controller
             foreach ($payload['commits'] as $commit) {
                 try {
                     $branch = str_replace('refs/heads/', '', $payload['ref']);
+                    if ($project->getOnlyBuildDefaultBranch() && $branch != $project->getBranch()) {
+                        continue;
+                    }
                     $committer = $commit['author']['email'];
                     $results[$commit['id']] = $this->createBuild(
                         $project,
@@ -382,6 +424,10 @@ class WebhookController extends \b8\Controller
             return array('status' => $status, 'commits' => $results);
         }
 
+        if (empty($results)) {
+            return array('status' => 'ignored', 'message' => 'Not default branch');
+        }
+
         return array('status' => 'ignored', 'message' => 'Unusable payload.');
     }
 
@@ -396,6 +442,9 @@ class WebhookController extends \b8\Controller
     {
         $project = $this->fetchProject($projectId, 'svn');
         $branch = $this->getParam('branch', $project->getBranch());
+        if ($project->getOnlyBuildDefaultBranch() && $branch != $project->getBranch()) {
+            return array('status' => 'ignored', 'message' => 'Not default branch');
+        }
         $commit = $this->getParam('commit');
         $commitMessage = $this->getParam('message');
         $committer = $this->getParam('committer');
