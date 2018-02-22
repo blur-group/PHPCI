@@ -94,9 +94,10 @@ PHPCI',
     'project_details' => 'Project Details',
     'public_key_help' => 'To make it easier to get started, we\'ve generated an SSH key pair for you to use
                             for this project. To use it, just add the following public key to the "deploy keys" section
-                            of your chosen source code hosting platform. Alternatively, if you are using your own ssh 
-                            key pair, paste the private key in the private key box to the left and the public key in 
-                            the box below.',
+                            of your chosen source code hosting platform.
+                            <br><br>
+                            Alternatively, if you are using your own ssh key pair, paste the private key in the private 
+                            key box to the left and the public key in the box below.',
     'select_repository_type' => 'Select repository type...',
     'github' => 'GitHub',
     'bitbucket' => 'Bitbucket',
