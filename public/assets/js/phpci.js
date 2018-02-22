@@ -379,6 +379,11 @@ var PHPCIConfirmDialog = Class.extend({
  */
 function setupProjectForm()
 {
+    $('#pubkey-input').bind('input propertychange', function () {
+        var el = $(this);
+        $('#pubkey-hidden').val(el.val());
+    });
+
     $('.github-container').hide();
 
     $('#element-reference').change(function()
