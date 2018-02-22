@@ -59,6 +59,7 @@ class ProjectServiceTest extends \PHPUnit_Framework_TestCase
             'allow_public_status' => 1,
             'build_config' => 'config',
             'branch' => 'testbranch',
+            'only_build_default_branch' => 1,
         );
 
         $returnValue = $this->testedService->createProject('Test Project', 'github', 'block8/phpci', $options);
@@ -68,6 +69,7 @@ class ProjectServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('config', $returnValue->getBuildConfig());
         $this->assertEquals('testbranch', $returnValue->getBranch());
         $this->assertEquals(1, $returnValue->getAllowPublicStatus());
+        $this->assertEquals(1, $returnValue->getOnlyBuildDefaultBranch());
     }
 
     /**
@@ -111,6 +113,22 @@ class ProjectServiceTest extends \PHPUnit_Framework_TestCase
         $returnValue = $this->testedService->updateProject($project, 'Test Project', 'github', 'block8/phpci', $options);
 
         $this->assertEquals(0, $returnValue->getAllowPublicStatus());
+    }
+
+    public function testExecute_EmptyOnlyBuildDefaultBranch()
+    {
+        $project = new Project();
+        $project->setOnlyBuildDefaultBranch(1);
+
+        $options = array(
+            'ssh_private_key' => 'private',
+            'ssh_public_key' => 'public',
+            'build_config' => 'config',
+        );
+
+        $returnValue = $this->testedService->updateProject($project, 'Test Project', 'github', 'block8/phpci', $options);
+
+        $this->assertEquals(0, $returnValue->getOnlyBuildDefaultBranch());
     }
 
     public function testExecute_DeleteProject()
