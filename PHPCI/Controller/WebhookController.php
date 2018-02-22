@@ -108,12 +108,19 @@ class WebhookController extends \b8\Controller
 
     /**
      * Bitbucket webhooks.
+     *
+     * @param $payload
+     * @param Project $project
+     * @return array
      */
     protected function bitbucketWebhook($payload, $project)
     {
         $results = array();
         $status = 'failed';
         foreach ($payload['push']['changes'] as $commit) {
+            if ( $project->getOnlyBuildDefaultBranch() && $commit['old']['name'] != $project->getBranch() ) {
+                continue;
+            }
             try {
                 $email = $commit['new']['target']['author']['raw'];
                 $email = substr($email, 0, strpos($email, '>'));
